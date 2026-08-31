@@ -1,0 +1,58 @@
+{
+  "entities": {
+    "UserProfile": {
+      "path": "users/{userId}",
+      "fields": {
+        "name": { "type": "string", "required": true },
+        "email": { "type": "string", "required": true },
+        "avatarUrl": { "type": "string", "required": false },
+        "monthlyBudget": { "type": "number", "required": true },
+        "currency": { "type": "string", "required": true }
+      }
+    },
+    "SubscriptionItem": {
+      "path": "users/{userId}/subscriptions/{subscriptionId}",
+      "fields": {
+        "name": { "type": "string", "required": true },
+        "cost": { "type": "number", "required": true },
+        "billingCycle": { "type": "string", "required": true },
+        "category": { "type": "string", "required": true },
+        "nextBillingDate": { "type": "string", "required": true },
+        "paymentMethod": { "type": "string", "required": true },
+        "status": { "type": "string", "required": true }
+      }
+    },
+    "PriceHikeAlert": {
+      "path": "users/{userId}/priceHikes/{hikeId}",
+      "fields": {
+        "name": { "type": "string", "required": true },
+        "oldPrice": { "type": "number", "required": true },
+        "newPrice": { "type": "number", "required": true },
+        "effectiveDate": { "type": "string", "required": true },
+        "status": { "type": "string", "required": true },
+        "reason": { "type": "string", "required": false },
+        "category": { "type": "string", "required": true }
+      }
+    },
+    "FreeTrial": {
+      "path": "users/{userId}/trials/{trialId}",
+      "fields": {
+        "name": { "type": "string", "required": true },
+        "costAfterTrial": { "type": "number", "required": true },
+        "daysLeft": { "type": "number", "required": true },
+        "alertStatus": { "type": "string", "required": true },
+        "status": { "type": "string", "required": true },
+        "category": { "type": "string", "required": true }
+      }
+    },
+    "SharingGroup": {
+      "path": "users/{userId}/groups/{groupId}",
+      "fields": {
+        "name": { "type": "string", "required": true },
+        "totalCost": { "type": "number", "required": true },
+        "yourShare": { "type": "number", "required": true },
+        "members": { "type": "array", "required": true }
+      }
+    }
+  }
+}

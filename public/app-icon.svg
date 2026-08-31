@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <rect width="512" height="512" rx="112" fill="white"/>
+  <g fill="#002045">
+    <!-- Binder Tabs -->
+    <rect x="172" y="72" width="22" height="40" rx="8"/>
+    <rect x="320" y="72" width="22" height="40" rx="8"/>
+
+    <!-- Left outer arc -->
+    <path d="M 104 98 C 66 128 66 312 104 348" stroke="#002045" stroke-width="20" stroke-linecap="round" fill="none"/>
+
+    <!-- Calendar Main Box -->
+    <path d="M 140 92 L 372 92 C 398 92 420 114 420 140 L 420 250 L 398 250 L 398 140 C 398 126 386 114 372 114 L 140 114 C 126 114 114 126 114 140 L 114 348 C 114 362 126 374 140 374 L 230 374 L 230 396 L 140 396 C 114 396 92 374 92 348 L 92 140 C 92 114 114 92 140 92 Z"/>
+
+    <!-- Calendar Top Header Bar -->
+    <rect x="114" y="160" width="284" height="18" rx="4"/>
+
+    <!-- Calendar Grid Items (Row 1) -->
+    <rect x="134" y="186" width="58" height="58" rx="10"/>
+    <rect x="212" y="186" width="58" height="58" rx="10"/>
+    <rect x="290" y="186" width="58" height="58" rx="10"/>
+
+    <!-- Calendar Grid Items (Row 2) -->
+    <rect x="134" y="264" width="58" height="58" rx="10"/>
+
+    <!-- Wallet Outer Container (Navy Blue) -->
+    <rect x="230" y="260" width="220" height="175" rx="28"/>
+  </g>
+
+  <!-- Wallet Inner Cutout (White background for dollar sign & latch) -->
+  <rect x="248" y="278" width="184" height="139" rx="18" fill="white"/>
+
+  <!-- Wallet Tab Latch (Navy Blue) -->
+  <g fill="#002045">
+    <path d="M 360 312 L 426 312 C 444 312 458 326 458 344 L 458 352 C 458 370 444 384 426 384 L 360 384 C 348 384 340 374 340 362 L 340 334 C 340 322 348 312 360 312 Z"/>
+    <!-- Button Circle (White) -->
+    <circle cx="414" cy="348" r="10" fill="white"/>
+
+    <!-- Dollar Sign inside Wallet -->
+    <path d="M 302 312 C 302 308.7 304.7 306 308 306 C 311.3 306 314 308.7 314 312 L 314 318 C 322.8 320.1 329 326.5 329 335.5 C 329 346 320.5 350.5 309 353 C 298.5 355.2 295 357.5 295 362 C 295 366.5 299 370 307 370 C 314 370 320 366.5 322.5 360.5 C 323.5 358 326.2 356.5 329 357.5 C 331.8 358.5 333.2 361.2 332.2 364 C 328.5 373.8 319.5 379.5 314 381 L 314 387 C 314 390.3 311.3 393 308 393 C 304.7 393 302 390.3 302 387 L 302 381 C 293.2 378.8 285 372.2 285 362 C 285 350.5 294.5 345.5 306 343 C 316.5 340.8 319 338.8 319 335.5 C 319 331.5 315.5 328 308 328 C 301.5 328 296 331 293.5 336.5 C 292.2 339.2 289.2 340.5 286.5 339.2 C 283.8 337.9 282.5 334.9 283.8 332.2 C 287.5 323.8 295 319 302 318 Z"/>
+  </g>
+</svg>

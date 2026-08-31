@@ -1,0 +1,6 @@
+{
+  "name": "SubTracker",
+  "description": "Subscription & expense management app with price hike alerts, free trial tracking, split sharing groups, and spending category analysis.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

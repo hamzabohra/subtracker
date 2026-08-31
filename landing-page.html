@@ -1,0 +1,94 @@
+<!-- Standalone Landing Page for SubTracker -->
+<!-- You can copy this file or upload /public/landing.html to your domain (Netlify, Vercel, GitHub Pages, cPanel) -->
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SubTracker — Master Your Subscriptions, Catch Rate Hikes & Save Money</title>
+  <meta name="description" content="SubTracker automatically tracks your recurring subscriptions, flags silent price hikes, reminds you before free trials auto-renew, and organizes your monthly spend.">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #0b1320;
+      color: #f1f5f9;
+    }
+  </style>
+</head>
+<body class="bg-[#0b1320] text-slate-100 antialiased">
+
+  <!-- Replace APP_URL with your application domain link -->
+  <script>
+    const APP_URL = "https://ais-pre-iyccon7wn36majtzp373w7-462501165992.asia-east1.run.app";
+    function openApp() {
+      window.open(APP_URL, '_blank');
+    }
+  </script>
+
+  <header class="sticky top-0 z-50 bg-[#0b1320]/90 backdrop-blur-md border-b border-slate-800/80">
+    <div class="max-w-[1200px] mx-auto px-4 md:px-8 h-20 flex items-center justify-between">
+      <a href="#" class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white font-bold text-xl">
+          S
+        </div>
+        <span class="font-bold text-xl text-white tracking-tight">SubTracker</span>
+      </a>
+
+      <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
+        <a href="#features" class="hover:text-blue-400">Features</a>
+        <a href="#calculator" class="hover:text-blue-400">Savings Calculator</a>
+        <a href="#how-it-works" class="hover:text-blue-400">How It Works</a>
+        <a href="#faq" class="hover:text-blue-400">FAQ</a>
+      </nav>
+
+      <div class="flex items-center gap-3">
+        <button onclick="openApp()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-bold">
+          Get Started Free
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <section class="relative pt-16 pb-24 text-center">
+    <div class="max-w-[1200px] mx-auto px-4">
+      <h1 class="text-4xl sm:text-6xl font-extrabold text-white mb-6 tracking-tight">
+        Master Your Subscriptions. <br />
+        <span class="bg-gradient-to-r from-blue-400 to-indigo-300 bg-clip-text text-transparent">
+          Catch Price Hikes. Save Hundreds.
+        </span>
+      </h1>
+      <p class="text-slate-300 max-w-2xl mx-auto mb-8 text-base sm:text-lg">
+        SubTracker tracks your recurring subscriptions, alerts you when services silently bump up prices, and reminds you before free trials auto-renew.
+      </p>
+      <button onclick="openApp()" class="px-8 py-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm shadow-xl shadow-blue-600/30">
+        Launch Web Application →
+      </button>
+    </div>
+  </section>
+
+  <!-- Section Anchor Features -->
+  <section id="features" class="py-16 bg-slate-950/60 border-t border-slate-800">
+    <div class="max-w-[1200px] mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800">
+        <h3 class="text-lg font-bold text-white mb-2">Price Hike Alerts</h3>
+        <p class="text-sm text-slate-300">Flags rate increases immediately so you never pay silently inflated fees.</p>
+      </div>
+      <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800">
+        <h3 class="text-lg font-bold text-white mb-2">Free Trial Countdown</h3>
+        <p class="text-sm text-slate-300">Get reminders 48 hours before free trial expiration dates.</p>
+      </div>
+      <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800">
+        <h3 class="text-lg font-bold text-white mb-2">Category Spending Caps</h3>
+        <p class="text-sm text-slate-300">Set budget thresholds for Entertainment, Software, Fitness, and Utilities.</p>
+      </div>
+    </div>
+  </section>
+</body>
+</html>
