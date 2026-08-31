@@ -1,5 +1,20 @@
-import { LocalNotifications } from '@capacitor/local-notifications';
 import { FreeTrial, SubscriptionItem } from '../types';
+
+// Safe dynamic accessor for Capacitor LocalNotifications plugin
+const getLocalNotificationsPlugin = async () => {
+  try {
+    // 1. Check window.Capacitor.Plugins first (available at runtime in Capacitor)
+    const capacitorObj = (window as any).Capacitor;
+    if (capacitorObj?.Plugins?.LocalNotifications) {
+      return capacitorObj.Plugins.LocalNotifications;
+    }
+    // 2. Try dynamic import
+    const mod = await import('@capacitor/local-notifications');
+    return mod.LocalNotifications || null;
+  } catch {
+    return null;
+  }
+};
 
 // Audio chime using Web Audio API for fallback/in-app alert sounds
 export const playNotificationChime = () => {
@@ -50,8 +65,11 @@ export const requestNotificationPermission = async (): Promise<boolean> => {
   try {
     // 1. Android Capacitor Native
     if (isCapacitorNative()) {
-      const status = await LocalNotifications.requestPermissions();
-      return status.display === 'granted';
+      const plugin = await getLocalNotificationsPlugin();
+      if (plugin) {
+        const status = await plugin.requestPermissions();
+        return status?.display === 'granted';
+      }
     }
 
     // 2. Standard Web Browser Notification API
@@ -74,9 +92,12 @@ export const requestNotificationPermission = async (): Promise<boolean> => {
 export const getNotificationPermissionStatus = async (): Promise<'granted' | 'denied' | 'default'> => {
   try {
     if (isCapacitorNative()) {
-      const status = await LocalNotifications.checkPermissions();
-      if (status.display === 'granted') return 'granted';
-      if (status.display === 'denied') return 'denied';
+      const plugin = await getLocalNotificationsPlugin();
+      if (plugin) {
+        const status = await plugin.checkPermissions();
+        if (status?.display === 'granted') return 'granted';
+        if (status?.display === 'denied') return 'denied';
+      }
       return 'default';
     }
 
@@ -100,21 +121,24 @@ export const sendLocalNotification = async (
   try {
     // 1. Android Local Notifications
     if (isCapacitorNative()) {
-      await LocalNotifications.schedule({
-        notifications: [
-          {
-            title,
-            body,
-            id,
-            schedule: { at: new Date(Date.now() + 100) },
-            sound: 'beep.wav',
-            smallIcon: 'ic_stat_notification',
-            actionTypeId: '',
-            extra: null,
-          },
-        ],
-      });
-      return true;
+      const plugin = await getLocalNotificationsPlugin();
+      if (plugin) {
+        await plugin.schedule({
+          notifications: [
+            {
+              title,
+              body,
+              id,
+              schedule: { at: new Date(Date.now() + 100) },
+              sound: 'beep.wav',
+              smallIcon: 'ic_stat_notification',
+              actionTypeId: '',
+              extra: null,
+            },
+          ],
+        });
+        return true;
+      }
     }
 
     // 2. Browser Notifications
@@ -161,20 +185,23 @@ export const scheduleItemAlert = async (
     const now = new Date();
     // Only schedule if alert date is in the future
     if (alertTime.getTime() > now.getTime() && isCapacitorNative()) {
-      const name = type === 'trial' ? (item as FreeTrial).serviceName : (item as SubscriptionItem).name;
-      const numId = Math.abs(hashCode(item.id));
+      const plugin = await getLocalNotificationsPlugin();
+      if (plugin) {
+        const name = type === 'trial' ? (item as FreeTrial).serviceName : (item as SubscriptionItem).name;
+        const numId = Math.abs(hashCode(item.id));
 
-      await LocalNotifications.schedule({
-        notifications: [
-          {
-            title: `⚠️ ${name} ${type === 'trial' ? 'Trial' : 'Subscription'} Ends Tomorrow!`,
-            body: `Your ${name} ${type === 'trial' ? 'free trial' : 'subscription'} expires on ${item.endDate}. Cancel or review now to avoid unwanted charges.`,
-            id: numId,
-            schedule: { at: alertTime },
-            sound: 'beep.wav',
-          },
-        ],
-      });
+        await plugin.schedule({
+          notifications: [
+            {
+              title: `⚠️ ${name} ${type === 'trial' ? 'Trial' : 'Subscription'} Ends Tomorrow!`,
+              body: `Your ${name} ${type === 'trial' ? 'free trial' : 'subscription'} expires on ${item.endDate}. Cancel or review now to avoid unwanted charges.`,
+              id: numId,
+              schedule: { at: alertTime },
+              sound: 'beep.wav',
+            },
+          ],
+        });
+      }
     }
   } catch (err) {
     console.error('Error scheduling alert:', err);
