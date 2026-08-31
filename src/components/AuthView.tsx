@@ -122,6 +122,10 @@ export const AuthView: React.FC<AuthViewProps> = ({
     setIsLoading(true);
     try {
       const result = await loginWithGoogle();
+      if (!result || !result.user) {
+        // Redirect was initiated or background listener is processing
+        return;
+      }
       const user = result.user;
       const profile: UserProfile = {
         name: user.displayName || 'Google User',
@@ -137,8 +141,19 @@ export const AuthView: React.FC<AuthViewProps> = ({
       await initializeUserInFirestore(user.uid, profile, false);
       onAuthSuccess(profile, false);
     } catch (err: any) {
-      console.error(err);
-      setError(err.message || 'Google login failed.');
+      console.error('Google Auth Error:', err);
+      const code = err?.code || '';
+      if (code === 'auth/popup-closed-by-user') {
+        setError('Sign-in cancelled.');
+      } else if (code === 'auth/unauthorized-domain') {
+        setError('Domain not authorized in Firebase Console (add localhost or your app domain).');
+      } else if (code === 'auth/operation-not-allowed') {
+        setError('Google Sign-In is not enabled in your Firebase Console.');
+      } else if (code === 'auth/popup-blocked') {
+        setError('Sign-in popup was blocked. Please allow popups or use email login.');
+      } else {
+        setError(err.message || 'Google login failed.');
+      }
     } finally {
       setIsLoading(false);
     }

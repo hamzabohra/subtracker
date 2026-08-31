@@ -2,6 +2,7 @@ import express from 'express';
 import path from 'path';
 import dotenv from 'dotenv';
 import Stripe from 'stripe';
+import nodemailer from 'nodemailer';
 import { createServer as createViteServer } from 'vite';
 
 dotenv.config();
@@ -18,6 +19,23 @@ function getStripe(): Stripe | null {
     stripeClient = new Stripe(secretKey);
   }
   return stripeClient;
+}
+
+// Lazy Nodemailer Transporter initialization
+function getMailTransporter() {
+  const host = process.env.SMTP_HOST;
+  const user = process.env.SMTP_USER;
+  const pass = process.env.SMTP_PASS;
+
+  if (host && user && pass) {
+    return nodemailer.createTransport({
+      host,
+      port: Number(process.env.SMTP_PORT) || 587,
+      secure: Number(process.env.SMTP_PORT) === 465,
+      auth: { user, pass },
+    });
+  }
+  return null;
 }
 
 // Webhook endpoint needs raw body
@@ -180,6 +198,105 @@ app.get('/api/stripe/verify-session', async (req, res) => {
   } catch (error: any) {
     console.error('Error verifying Stripe session:', error);
     res.status(500).json({ error: error.message || 'Failed to verify session' });
+  }
+});
+
+// Check Notification & Email Configuration Status
+app.get('/api/notifications/status', (req, res) => {
+  const isSmtpConfigured = Boolean(
+    process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS
+  );
+  res.json({
+    emailServiceConfigured: isSmtpConfigured,
+    smtpHost: process.env.SMTP_HOST || 'Not configured (Simulated/Ethereal mode)',
+    fromAddress: process.env.SMTP_FROM || 'SubTracker Alerts <alerts@subtracker.app>',
+  });
+});
+
+// Send Test or Real Trial Expiry Email
+app.post('/api/notifications/test-email', async (req, res) => {
+  try {
+    const { email, serviceName = 'Netflix' } = req.body;
+
+    if (!email || !email.includes('@')) {
+      return res.status(400).json({ success: false, message: 'A valid email address is required.' });
+    }
+
+    const transporter = getMailTransporter();
+    const from = process.env.SMTP_FROM || '"SubTracker Alerts" <alerts@subtracker.app>';
+
+    const htmlBody = `
+      <div style="font-family: Arial, sans-serif; max-width: 540px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
+        <div style="background-color: #002045; padding: 16px 20px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
+          <h1 style="color: #ffffff; margin: 0; font-size: 20px; letter-spacing: 0.5px;">SubTracker Alert</h1>
+        </div>
+        <p style="font-size: 15px; color: #1e293b; line-height: 1.5;">Hello,</p>
+        <div style="background-color: #eff4ff; border-left: 4px solid #002045; padding: 14px 16px; margin: 16px 0; border-radius: 4px;">
+          <strong style="color: #002045; font-size: 16px;">⚠️ Free Trial Ending Tomorrow!</strong>
+          <p style="margin: 6px 0 0; color: #334155; font-size: 14px;">Your <strong>${serviceName}</strong> free trial is scheduled to expire in 24 hours.</p>
+        </div>
+        <p style="font-size: 14px; color: #475569; line-height: 1.5;">
+          If you do not plan to keep this subscription, please remember to cancel it today in your account settings to prevent automatic billing.
+        </p>
+        <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #e2e8f0; font-size: 12px; color: #94a3b8; text-align: center;">
+          Sent by SubTracker &bull; Manage your subscriptions & alerts anytime.
+        </div>
+      </div>
+    `;
+
+    if (transporter) {
+      // Real SMTP Dispatch
+      await transporter.sendMail({
+        from,
+        to: email,
+        subject: `SubTracker Alert: Your ${serviceName} free trial ends tomorrow`,
+        html: htmlBody,
+      });
+
+      return res.json({
+        success: true,
+        message: `Email alert sent successfully to ${email} via SMTP!`,
+      });
+    } else {
+      // Ethereal Test Account fallback for instant interactive testing
+      let testAccount;
+      try {
+        testAccount = await nodemailer.createTestAccount();
+        const testTransporter = nodemailer.createTransport({
+          host: 'smtp.ethereal.email',
+          port: 587,
+          secure: false,
+          auth: {
+            user: testAccount.user,
+            pass: testAccount.pass,
+          },
+        });
+
+        const info = await testTransporter.sendMail({
+          from: '"SubTracker Alerts" <alerts@subtracker.app>',
+          to: email,
+          subject: `[Test Alert] Your ${serviceName} free trial ends tomorrow`,
+          html: htmlBody,
+        });
+
+        const previewUrl = nodemailer.getTestMessageUrl(info);
+
+        return res.json({
+          success: true,
+          message: `Test email dispatched to ${email}! (Preview generated via Ethereal test inbox)`,
+          previewUrl: previewUrl || undefined,
+        });
+      } catch {
+        // Fallback simulation
+        return res.json({
+          success: true,
+          message: `Test email alert simulated successfully for ${email}. To receive live inbox emails, configure SMTP_HOST, SMTP_USER, and SMTP_PASS in Settings.`,
+        });
+      }
+    }
+  } catch (error: any) {
+    console.error('Error sending alert email:', error);
+    res.status(500).json({ success: false, message: error.message || 'Failed to dispatch email' });
   }
 });
 

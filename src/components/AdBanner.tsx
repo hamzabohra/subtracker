@@ -19,6 +19,51 @@ export const AdBanner: React.FC<AdBannerProps> = ({
     return null;
   }
 
+  if (format === 'banner') {
+    return (
+      <div
+        id="admob-top-banner"
+        className={`w-full bg-gradient-to-r from-[#002045]/10 via-blue-900/10 to-[#002045]/10 dark:from-blue-950/40 dark:via-slate-900/60 dark:to-blue-950/40 border border-blue-200 dark:border-blue-500/20 rounded-xl p-3.5 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xs ${className}`}
+      >
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <div className="w-9 h-9 rounded-lg bg-blue-600/15 dark:bg-blue-600/25 border border-blue-500/30 flex items-center justify-center shrink-0 text-blue-700 dark:text-blue-400">
+            <span className="material-symbols-outlined text-[20px]">verified</span>
+          </div>
+          <div className="text-left flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="px-1.5 py-0.2 rounded text-[10px] font-bold tracking-wider uppercase bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/30">
+                Ad
+              </span>
+              <span className="text-xs font-bold text-[#002045] dark:text-white truncate">
+                Save up to $240/yr with Family Sharing Bundles
+              </span>
+            </div>
+            <p className="text-[11px] text-[#43474e] dark:text-slate-400 mt-0.5 truncate">
+              Google AdMob Adaptive Top Unit &bull; {adSlotId}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end shrink-0">
+          <a
+            href="https://vibedevs.online"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-3.5 py-1.5 bg-[#002045] hover:bg-[#1a365d] dark:bg-blue-600 dark:hover:bg-blue-500 text-white text-xs font-semibold rounded-lg transition-colors shadow-xs"
+          >
+            Explore Deals
+          </a>
+          <button
+            onClick={() => setIsDismissed(true)}
+            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            title="Dismiss Ad"
+          >
+            <span className="material-symbols-outlined text-[16px] block">close</span>
+          </button>
+        </div>
+      </div>
+    );
+  }
   if (format === 'sticky-bottom') {
     return (
       <div

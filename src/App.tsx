@@ -15,9 +15,16 @@ import { SettingsModal } from './components/SettingsModal';
 import { InterstitialAdModal } from './components/InterstitialAdModal';
 import { AuthView } from './components/AuthView';
 import {
+  scheduleItemAlert,
+  getPendingAlerts,
+  sendLocalNotification,
+} from './lib/notifications';
+import {
   auth,
   onAuthStateChanged,
   signOut,
+  getRedirectResult,
+  ensureUserProfileExists,
   subscribeToUserData,
   saveSubscriptionToCloud,
   deleteSubscriptionFromCloud,
@@ -46,10 +53,31 @@ export default function App() {
     document.documentElement.classList.add('dark');
   }, []);
 
-  // Listen to Firebase Auth state
+  // Listen to Firebase Auth state & Catch Mobile Redirect Result
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (fbUser) => {
+    // 1. Process any pending mobile redirect sign-ins
+    getRedirectResult(auth)
+      .then(async (result) => {
+        if (result?.user) {
+          const profile = await ensureUserProfileExists(result.user);
+          setUser(profile);
+          setCurrentUserUid(result.user.uid);
+          setIsAuthenticated(true);
+        }
+      })
+      .catch((err) => {
+        console.warn('getRedirectResult notice:', err);
+      });
+
+    // 2. Listen to active auth session
+    const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
       if (fbUser) {
+        try {
+          const profile = await ensureUserProfileExists(fbUser);
+          setUser(profile);
+        } catch (err) {
+          console.warn('ensureUserProfileExists notice:', err);
+        }
         setCurrentUserUid(fbUser.uid);
         setIsAuthenticated(true);
       } else {
@@ -58,6 +86,7 @@ export default function App() {
       }
       setIsAuthLoading(false);
     });
+
     return () => unsubscribe();
   }, []);
 
@@ -183,12 +212,18 @@ export default function App() {
     }
   };
 
+  // Dismissed alert IDs in this session
+  const [dismissedAlertIds, setDismissedAlertIds] = useState<string[]>([]);
+
   // Add Item Handlers
   const handleAddSubscription = (newSub: SubscriptionItem) => {
     setSubscriptions((prev) => [newSub, ...prev]);
     if (currentUserUid) {
       saveSubscriptionToCloud(currentUserUid, newSub);
     }
+    // Schedule native alarm if mobile alerts enabled
+    scheduleItemAlert(newSub, 'subscription');
+
     // Show sponsored interstitial ad after adding subscription
     setInterstitialAdTitle(`Added "${newSub.name}" Successfully!`);
     setIsInterstitialAdOpen(true);
@@ -199,10 +234,18 @@ export default function App() {
     if (currentUserUid) {
       saveTrialToCloud(currentUserUid, newTrial);
     }
+    // Schedule native alarm if mobile alerts enabled
+    scheduleItemAlert(newTrial, 'trial');
+
     // Show sponsored interstitial ad after adding trial
     setInterstitialAdTitle(`Trial for "${newTrial.serviceName}" Created!`);
     setIsInterstitialAdOpen(true);
   };
+
+  // Pending urgent alerts
+  const pendingAlerts = getPendingAlerts(trials, subscriptions).filter(
+    (a) => !dismissedAlertIds.includes(a.id)
+  );
 
   // Counts for notifications
   const urgentTrialsCount = trials.filter((t) => t.status === 'active' && t.daysLeft <= 2).length;
@@ -240,6 +283,48 @@ export default function App() {
 
       {/* Main View Container */}
       <main className="max-w-[1200px] mx-auto px-4 md:px-10 py-6">
+        {/* Urgent Expiry Banner */}
+        {pendingAlerts.length > 0 && (
+          <div className="mb-6 space-y-2">
+            {pendingAlerts.map((alert) => (
+              <div
+                key={alert.id}
+                className="bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700/50 rounded-xl p-3.5 flex items-center justify-between gap-3 shadow-xs animate-fade-in"
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className="material-symbols-outlined text-amber-600 dark:text-amber-400 text-[22px] shrink-0 animate-bounce">
+                    warning
+                  </span>
+                  <div>
+                    <span className="text-xs font-bold text-amber-900 dark:text-amber-200">
+                      Action Required: {alert.name} ({alert.message})
+                    </span>
+                    <p className="text-[11px] text-amber-800/80 dark:text-amber-300/80">
+                      Review or cancel before automatic billing starts on {alert.endDate || 'soon'}.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    onClick={() => setActiveTab('trials')}
+                    className="px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold rounded-lg transition-colors shadow-xs"
+                  >
+                    View Alert
+                  </button>
+                  <button
+                    onClick={() => setDismissedAlertIds((prev) => [...prev, alert.id])}
+                    className="p-1 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 rounded-full"
+                    title="Dismiss"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">close</span>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
         {activeTab === 'roster' && (
           <RosterView
             subscriptions={subscriptions}

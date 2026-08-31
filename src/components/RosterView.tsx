@@ -40,10 +40,16 @@ export const RosterView: React.FC<RosterViewProps> = ({
     Math.round((totalMonthlyActiveSpend / user.monthlyBudget) * 100)
   );
 
-  const isSubLimitReached = subscriptions.length >= 5;
-
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-6 animate-fade-in">
+      {/* Top Sponsored Ad Banner */}
+      <AdBanner
+        format="banner"
+        user={user}
+        adSlotId="ca-app-pub-3940256099942544/6300978111"
+        className="mb-2"
+      />
+
       {/* Header & Budget Progress Section */}
       <section className="bg-white rounded-xl p-6 shadow-[0_4px_20px_rgba(26,54,93,0.05)] border border-[#c4c6cf]/30 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -52,33 +58,22 @@ export const RosterView: React.FC<RosterViewProps> = ({
               <h2 className="text-2xl md:text-3xl font-bold text-[#002045] tracking-tight">
                 Subscriptions Roster
               </h2>
-              <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${
-                isSubLimitReached
-                  ? 'bg-amber-500/15 text-amber-800 border-amber-500/40'
-                  : 'bg-blue-50 text-blue-800 border-blue-200'
-              }`}>
-                {subscriptions.length}/5 Subscriptions
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold border bg-blue-50 text-blue-800 border-blue-200">
+                {subscriptions.length} {subscriptions.length === 1 ? 'Subscription' : 'Subscriptions'}
               </span>
             </div>
             <p className="text-sm md:text-base text-[#43474e] mt-0.5">
-              Track and manage up to 5 recurring bills in one place.
+              Track and manage all your recurring bills in one place.
             </p>
           </div>
 
           <button
             onClick={onAddNewSubscription}
-            disabled={isSubLimitReached}
-            className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-colors shadow-sm self-start sm:self-auto ${
-              isSubLimitReached
-                ? 'bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-300'
-                : 'bg-[#002045] text-white hover:bg-[#1a365d] active:scale-95'
-            }`}
-            title={isSubLimitReached ? 'Maximum 5 subscriptions reached' : 'Add a subscription'}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-colors shadow-sm self-start sm:self-auto bg-[#002045] text-white hover:bg-[#1a365d] active:scale-95"
+            title="Add a subscription"
           >
-            <span className="material-symbols-outlined text-[18px]">
-              {isSubLimitReached ? 'lock' : 'add'}
-            </span>
-            <span>{isSubLimitReached ? 'Limit Reached (5/5)' : 'Add Subscription'}</span>
+            <span className="material-symbols-outlined text-[18px]">add</span>
+            <span>Add Subscription</span>
           </button>
         </div>
 

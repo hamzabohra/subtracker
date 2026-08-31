@@ -28,10 +28,6 @@ export const AddSubscriptionModal: React.FC<AddModalProps> = ({
     activeTab === 'trials' ? 'trial' : 'subscription'
   );
 
-  const isSubLimitReached = itemType === 'subscription' && subscriptionsCount >= 5;
-  const isTrialLimitReached = itemType === 'trial' && trialsCount >= 4;
-  const isLimitReached = isSubLimitReached || isTrialLimitReached;
-
   // Search & Selection State
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedService, setSelectedService] = useState<PopularService | null>(null);
@@ -115,10 +111,6 @@ export const AddSubscriptionModal: React.FC<AddModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (isLimitReached) {
-      return;
-    }
 
     const finalName = name.trim();
     if (!finalName) return;
@@ -213,7 +205,7 @@ export const AddSubscriptionModal: React.FC<AddModalProps> = ({
             }`}
           >
             <span className="material-symbols-outlined text-[16px]">list_alt</span>
-            <span>Subscription ({subscriptionsCount}/5)</span>
+            <span>Subscription ({subscriptionsCount})</span>
           </button>
           <button
             type="button"
@@ -225,30 +217,9 @@ export const AddSubscriptionModal: React.FC<AddModalProps> = ({
             }`}
           >
             <span className="material-symbols-outlined text-[16px]">timer</span>
-            <span>Free Trial ({trialsCount}/4)</span>
+            <span>Free Trial ({trialsCount})</span>
           </button>
         </div>
-
-        {/* Limit Warning Banner */}
-        {isLimitReached && (
-          <div className="mb-4 bg-amber-500/15 border border-amber-500/40 rounded-xl p-3.5 text-xs text-amber-900 flex items-start gap-3 shadow-xs">
-            <span className="material-symbols-outlined text-amber-600 text-[20px] shrink-0 mt-0.5">
-              info
-            </span>
-            <div className="flex-1">
-              <span className="font-bold block text-[#002045]">
-                {isSubLimitReached
-                  ? 'Maximum Limit Reached (5/5 Subscriptions)'
-                  : 'Maximum Limit Reached (4/4 Free Trials)'}
-              </span>
-              <p className="text-slate-600 text-[11px] mt-0.5 leading-relaxed">
-                {isSubLimitReached
-                  ? 'You have reached the maximum allowed limit of 5 active subscriptions. Remove or cancel an existing subscription to add a new one.'
-                  : 'You have reached the maximum allowed limit of 4 active free trials. Complete or delete an existing trial to track a new one.'}
-              </p>
-            </div>
-          </div>
-        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Popular Subscription Search Dropdown */}
@@ -537,23 +508,12 @@ export const AddSubscriptionModal: React.FC<AddModalProps> = ({
             >
               Cancel
             </button>
-            {isLimitReached ? (
-              <button
-                type="button"
-                disabled
-                className="px-5 py-2.5 rounded-lg bg-slate-300 dark:bg-slate-700 text-slate-500 dark:text-slate-400 text-sm font-bold cursor-not-allowed flex items-center gap-1.5"
-              >
-                <span className="material-symbols-outlined text-[18px]">block</span>
-                <span>{itemType === 'subscription' ? 'Max 5 Subscriptions Reached' : 'Max 4 Trials Reached'}</span>
-              </button>
-            ) : (
-              <button
-                type="submit"
-                className="px-5 py-2.5 rounded-lg bg-[#002045] text-white text-sm font-semibold hover:bg-[#1a365d] transition-colors shadow-sm"
-              >
-                Add {itemType.charAt(0).toUpperCase() + itemType.slice(1)}
-              </button>
-            )}
+            <button
+              type="submit"
+              className="px-5 py-2.5 rounded-lg bg-[#002045] text-white text-sm font-semibold hover:bg-[#1a365d] transition-colors shadow-sm"
+            >
+              Add {itemType.charAt(0).toUpperCase() + itemType.slice(1)}
+            </button>
           </div>
         </form>
       </div>

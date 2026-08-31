@@ -7,6 +7,9 @@ import {
   onAuthStateChanged,
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
+  signInWithCredential,
   User as FirebaseUser,
 } from 'firebase/auth';
 import {
@@ -44,9 +47,48 @@ export const db = firestoreDb;
 
 // Helper for Google Sign-In
 const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({ prompt: 'select_account' });
 
 export const loginWithGoogle = async () => {
-  return await signInWithPopup(auth, googleProvider);
+  // 1. Check if Capacitor native with GoogleAuth plugin is available
+  try {
+    const capacitorObj = (window as any).Capacitor;
+    if (capacitorObj && typeof capacitorObj.isNativePlatform === 'function' && capacitorObj.isNativePlatform()) {
+      const Plugins = capacitorObj.Plugins;
+      if (Plugins?.GoogleAuth) {
+        const googleUser = await Plugins.GoogleAuth.signIn();
+        const idToken = googleUser?.authentication?.idToken || googleUser?.idToken;
+        if (idToken) {
+          const credential = GoogleAuthProvider.credential(idToken);
+          return await signInWithCredential(auth, credential);
+        }
+      }
+    }
+  } catch (nativeErr) {
+    console.warn('Native Capacitor GoogleAuth attempt:', nativeErr);
+  }
+
+  // 2. Standard Web & WebView popup/redirect
+  try {
+    return await signInWithPopup(auth, googleProvider);
+  } catch (error: any) {
+    console.warn('signInWithPopup failed, attempting signInWithRedirect fallback:', error);
+    // If popup is blocked or unsupported in Android WebView, fallback to redirect
+    if (
+      error?.code === 'auth/popup-blocked' ||
+      error?.code === 'auth/cancelled-popup-request' ||
+      error?.code === 'auth/popup-closed-by-user' ||
+      error?.message?.includes('popup')
+    ) {
+      await signInWithRedirect(auth, googleProvider);
+      return null;
+    }
+    throw error;
+  }
+};
+
+export const loginWithGoogleRedirect = async () => {
+  return await signInWithRedirect(auth, googleProvider);
 };
 
 export {
@@ -54,6 +96,9 @@ export {
   createUserWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
+  signInWithRedirect,
+  getRedirectResult,
+  signInWithCredential,
 };
 export type { FirebaseUser };
 
@@ -260,6 +305,43 @@ export const initializeUserInFirestore = async (
     }
   } catch (error) {
     handleFirestoreError(error, OperationType.WRITE, `users/${uid}`);
+  }
+};
+
+// Ensure User Profile Document Exists in Firestore (for Google Login / Redirects)
+export const ensureUserProfileExists = async (fbUser: FirebaseUser): Promise<UserProfile> => {
+  try {
+    const userRef = doc(db, 'users', fbUser.uid);
+    const snap = await getDoc(userRef);
+    if (snap.exists()) {
+      return snap.data() as UserProfile;
+    }
+
+    const defaultProfile: UserProfile = {
+      name: fbUser.displayName || 'Google User',
+      avatarUrl:
+        fbUser.photoURL ||
+        'https://lh3.googleusercontent.com/aida-public/AB6AXuBBB8cSMrzEhwY1glldjR4IUdUhsLg2jQPhb8VHua-RY3EEZB3SImAP538QIpMeVjHSR4VklxpwO7DCXtaKch4d36DGoKgfJkmKy2gHQGy3Z5GLIwnJaOoNtwdxZlTc2Pj3sVUrWdBjODMdLcGD8vDcOnvvl-J6ChoI5CXheV6Lr4UhyDG2dYAXzTFTlqnV6bkW2A2yEFuJiereUG_wy_EPRbWHVjCt7CqoTI-ibv8vutRDKJCd_UaQ',
+      email: fbUser.email || '',
+      country: 'United States',
+      currency: 'USD',
+      currencySymbol: '$',
+      monthlyBudget: 300,
+    };
+
+    await initializeUserInFirestore(fbUser.uid, defaultProfile, false);
+    return defaultProfile;
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, `users/${fbUser.uid}`);
+    return {
+      name: fbUser.displayName || 'User',
+      avatarUrl: fbUser.photoURL || '',
+      email: fbUser.email || '',
+      country: 'United States',
+      currency: 'USD',
+      currencySymbol: '$',
+      monthlyBudget: 300,
+    };
   }
 };
 

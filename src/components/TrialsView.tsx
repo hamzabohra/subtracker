@@ -21,10 +21,17 @@ export const TrialsView: React.FC<TrialsViewProps> = ({
   const currSymbol = getCurrencySymbol(user);
   const activeTrials = trials.filter((t) => t.status === 'active');
   const expiredTrials = trials.filter((t) => t.status === 'expired');
-  const isTrialLimitReached = trials.length >= 4;
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-6 animate-fade-in">
+      {/* Top Sponsored Ad Banner */}
+      <AdBanner
+        format="banner"
+        user={user}
+        adSlotId="ca-app-pub-3940256099942544/6300978111"
+        className="mb-2"
+      />
+
       {/* Header Section */}
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
@@ -32,33 +39,22 @@ export const TrialsView: React.FC<TrialsViewProps> = ({
             <h2 className="text-3xl md:text-4xl font-bold text-[#0d1c2e] tracking-tight">
               Free Trial Tracker
             </h2>
-            <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${
-              isTrialLimitReached
-                ? 'bg-amber-500/15 text-amber-800 border-amber-500/40'
-                : 'bg-blue-50 text-blue-800 border-blue-200'
-            }`}>
-              {trials.length}/4 Free Trials
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold border bg-blue-50 text-blue-800 border-blue-200">
+              {trials.length} {trials.length === 1 ? 'Trial' : 'Trials'} ({activeTrials.length} Active)
             </span>
           </div>
           <p className="text-base md:text-lg text-[#43474e] mt-2">
-            Monitor up to 4 active trials before they convert to paid subscriptions.
+            Monitor your active trials before they convert to paid subscriptions.
           </p>
         </div>
 
         <button
           onClick={onAddNewTrial}
-          disabled={isTrialLimitReached}
-          className={`h-12 px-6 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors shadow-sm self-start md:self-auto ${
-            isTrialLimitReached
-              ? 'bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-300'
-              : 'bg-[#002045] text-white hover:bg-[#1a365d] active:scale-95'
-          }`}
-          title={isTrialLimitReached ? 'Maximum 4 trials reached' : 'Add a new trial'}
+          className="h-12 px-6 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors shadow-sm self-start md:self-auto bg-[#002045] text-white hover:bg-[#1a365d] active:scale-95"
+          title="Add a new trial"
         >
-          <span className="material-symbols-outlined text-[20px]">
-            {isTrialLimitReached ? 'lock' : 'add'}
-          </span>
-          <span>{isTrialLimitReached ? 'Limit Reached (4/4)' : 'Add New Trial'}</span>
+          <span className="material-symbols-outlined text-[20px]">add</span>
+          <span>Add New Trial</span>
         </button>
       </header>
 
